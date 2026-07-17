@@ -1,14 +1,14 @@
 # DOHA MUA
 
-A full-stack makeup education and bridal booking platform built with React, TypeScript, Vite, Node.js, Express, Sequelize, MySQL, and Docker Compose.
+A full-stack makeup education and bridal availability platform built with React, TypeScript, Vite, Node.js, Express, Sequelize, MySQL, and Docker Compose.
 
 ## What is included
 
 - Student and administrator JWT authentication, with optional Google sign-in.
 - Published makeup courses, instructor details, ordered lessons, image uploads, and secure lesson-video handoff.
 - Student course library with server-authoritative regular/sale pricing and explicit demo success, failure, and cancellation results.
-- Authenticated, studio-only bridal booking with a fixed server-configured fee and transaction-safe double-booking prevention.
-- Admin booking/payment/availability management, searchable student history, website content, course/lesson management, purchases and notifications.
+- Public, read-only bridal availability calendar with no account requirement and no customer booking or bridal payment flow.
+- Protected admin bridal slot management, legacy appointment history, searchable student history, website content, course/lesson management, purchases and notifications.
 - Replaceable bilingual email architecture, prepared but disabled by default.
 - Seeded accounts, courses, lessons, paid purchase, and January–March 2027 availability.
 
@@ -26,8 +26,6 @@ ADMIN_EMAIL=Kamalweshahi15@gmail.com
 EMAIL_ENABLED=false
 EMAIL_PROVIDER=
 EMAIL_FROM=
-BOOKING_FEE_AMOUNT=100
-BOOKING_FEE_CURRENCY=ILS
 VDOCIPHER_API_SECRET=
 ```
 
@@ -71,17 +69,17 @@ docker compose config
 | Student | `student@doha-mua.local` | `User1234` |
 | Student | `maya@doha-mua.local` | `Student1234` |
 
-## Booking schedule and email
+## Bridal availability schedule and email
 
-The seed is idempotent and creates Monday–Saturday availability from January 4 through March 31, 2027. Sundays are never generated. Every open date uses exactly `08:00–11:00`, `11:00–14:00`, and `14:00–17:00`. Booking requires authentication. A successful demo fee payment creates a `PENDING` appointment and locks its slot; failed or cancelled payment results create no appointment and do not lock the slot. A management rejection changes a successful fee to `REFUND_REQUIRED`, while a customer cancellation remains non-refundable. Cancelling either kind of appointment reopens the slot.
+The seed is idempotent and creates Monday–Saturday availability from January 4 through March 31, 2027. Sundays are never generated. Every open date uses exactly `08:00–11:00`, `11:00–14:00`, and `14:00–17:00`. Anyone can view the public calendar without an account. The public response includes only date, time range, and availability status. Only an administrator can block or reopen a slot. Existing legacy appointment records remain unavailable and remain visible only in protected administration and student history views.
 
-Email templates and a replaceable provider interface are implemented for booking and purchase events. Email is disabled by default. With `EMAIL_ENABLED=false`, successful bookings and purchases are saved normally and the backend logs `[email:skipped]`. A console adapter is available for development with `EMAIL_ENABLED=true` and `EMAIL_PROVIDER=console`; SMTP and Resend variables are reserved for future adapters.
+Email templates and a replaceable provider interface remain implemented for legacy appointment updates and course purchase events. Email is disabled by default. A console adapter is available for development with `EMAIL_ENABLED=true` and `EMAIL_PROVIDER=console`; SMTP and Resend variables are reserved for future adapters.
 
 ## Payments and protected video
 
 The checkout endpoint records a purchase with a `paypal` or `payplus` provider selection and an explicit demo result. Only `paid` purchases grant course/video access. Failed and cancelled results remain visible in payment history without granting access. Course price is always selected by the backend: a valid positive sale price below the regular price is used; client-supplied amounts are never accepted. Before accepting live payments, replace the demo result with provider-side order/session creation and verified webhooks.
 
-`BOOKING_FEE_AMOUNT` and `BOOKING_FEE_CURRENCY` are trusted backend settings (defaults: `100` and `ILS`). The demo UI exposes success, failure, and cancellation controls for testability. Live payment integration should create a pending provider transaction and create the appointment only after verified success. Email delivery remains non-blocking and disabled unless configured.
+There is no bridal checkout or bridal deposit endpoint. Course checkout remains unchanged and separate from the bridal availability calendar. Email delivery remains non-blocking and disabled unless configured.
 
 Website Content in Admin edits only the bilingual hero, About Doha, bridal description, studio address message, WhatsApp number, and contact email. Public rendering falls back to built-in defaults if the record cannot load. The default address intentionally says that the full studio address is sent after confirmation.
 
@@ -103,6 +101,6 @@ Google OAuth is disabled until `MAKEUP_GOOGLE_CLIENT_ID` is set. The backend val
 
 The selected English or Arabic language is stored under `doha-mua-language` and remains active across refreshes, public routes, student pages, and admin pages. Arabic sets `<html lang="ar" dir="rtl">`; English restores `lang="en" dir="ltr"`. The calendar localizes weekday and month names while dates, prices, email addresses, and time slots remain readable left-to-right.
 
-The database-backed Website Content record is the primary source for visible `wa.me` links, with `VITE_WHATSAPP_NUMBER=972556800545` as the safe frontend fallback. The shared WhatsApp link URL-encodes an English or Arabic bridal enquiry and appears on public pages, booking success, and in the footer; the public floating link is intentionally hidden in Admin.
+The database-backed Website Content record is the primary source for visible `wa.me` links, with `VITE_WHATSAPP_NUMBER=972556800545` as the safe frontend fallback. The shared WhatsApp link URL-encodes an English or Arabic bridal enquiry and appears on public pages and in the footer; the public floating link is intentionally hidden in Admin.
 
-Manual checks: switch to Arabic on Home, Courses, Login, Register, Booking, all policy pages, My Courses, course details, and Admin; refresh and confirm Arabic persists; verify RTL and no horizontal overflow at desktop and mobile widths; confirm the booking calendar shows Arabic weekdays/months; and inspect WhatsApp links for `972556800545` and the language-appropriate encoded message.
+Manual checks: switch to Arabic on Home, Courses, Login, Register, Bridal Availability, all policy pages, My Courses, course details, and Admin; refresh and confirm Arabic persists; verify RTL and no horizontal overflow at desktop and mobile widths; confirm the bridal calendar shows Arabic weekdays/months; and inspect WhatsApp links for `972556800545` and the language-appropriate encoded message.

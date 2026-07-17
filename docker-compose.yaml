@@ -36,9 +36,6 @@ services:
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASSWORD: ${SMTP_PASSWORD:-}
       RESEND_API_KEY: ${RESEND_API_KEY:-}
-      CAPTCHA_ENABLED: ${CAPTCHA_ENABLED:-false}
-      BOOKING_FEE_AMOUNT: ${BOOKING_FEE_AMOUNT:-100}
-      BOOKING_FEE_CURRENCY: ${BOOKING_FEE_CURRENCY:-ILS}
       VDOCIPHER_API_SECRET: ${VDOCIPHER_API_SECRET:-}
     volumes:
       - makeup-upload-data:/app/uploads

@@ -1,25 +1,40 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import type { Appointment, Availability, BookingPaymentStatus } from '../../models/Makeup'
-import { book, getAvailability, type DemoPaymentResult } from '../../services/makeup-service'
+import type { PublicAvailability } from '../../models/Makeup'
+import { getAvailability } from '../../services/makeup-service'
 import extractError from '../../services/extract-error'
-import useAuth from '../../hooks/use-auth'
 import useLanguage from '../../hooks/use-language'
 import useWebsiteContent from '../../hooks/use-website-content'
 import BookingCalendar from './BookingCalendar'
-import WhatsAppLink from '../common/WhatsAppLink'
-import { formatVisibleDate } from '../../services/format'
 import './Makeup.css'
 
-const empty = { availabilityId: '', brideName: '', email: '', phone: '', eventType: '', peopleCount: '1', notes: '', policyAccepted: false, website: '' }
 export default function Booking() {
-  const {user}=useAuth();const{language,t}=useLanguage();const{content}=useWebsiteContent();const[slots,setSlots]=useState<Availability[]>([]);const[form,setForm]=useState(empty);const[busy,setBusy]=useState(false);const[success,setSuccess]=useState<Appointment|null>(null);const[outcome,setOutcome]=useState<BookingPaymentStatus|null>(null)
-  useEffect(()=>{void getAvailability().then(setSlots).catch(error=>toast.error(extractError(error,language)))},[language])
-  useEffect(()=>{if(user)setForm(current=>({...current,brideName:current.brideName||`${user.firstName} ${user.lastName}`,email:user.email,phone:current.phone||user.phone||''}))},[user])
-  const set=(key:keyof typeof form,value:string|boolean)=>setForm({...form,[key]:value})
-  async function submit(demoResult:DemoPaymentResult){if(!form.availabilityId||!form.brideName||!form.email||!form.phone||!form.eventType||!form.peopleCount)return toast.error(t('Please complete all required fields.','يرجى إكمال جميع الحقول المطلوبة.'));if(!/^\S+@\S+\.\S+$/.test(form.email))return toast.error(t('Please enter a valid email address.','يرجى إدخال بريد إلكتروني صالح.'));if(!/^(?:\+972|972|0)(?:5\d|[23489])[- ]?\d{3}[- ]?\d{4}$/.test(form.phone))return toast.error(t('Please enter a valid Israeli phone number.','يرجى إدخال رقم هاتف إسرائيلي صالح.'));if(!form.policyAccepted)return toast.error(t('Please agree to the booking policy and terms.','يرجى الموافقة على سياسة الحجز والشروط.'));setBusy(true);try{const result=await book({...form,availabilityId:Number(form.availabilityId),peopleCount:Number(form.peopleCount),preferredLanguage:language,provider:'payplus',demoResult});setOutcome(result.paymentStatus);if(result.appointment){setSuccess(result.appointment);setForm(empty);setSlots(await getAvailability())}}catch(error){toast.error(extractError(error,language))}finally{setBusy(false)}}
-  const studio=language==='ar'?content.studioAddressAr:content.studioAddressEn
-  if(success)return <section className="makeup-page booking success"><p className="eyebrow">{t('PAYMENT SUCCESSFUL · REQUEST RECEIVED','تم الدفع · تم استلام الطلب')}</p><h1>{t('Thank you,','شكرًا،')} <bdi>{success.brideName}</bdi>.</h1><p>{t('Your booking fee was paid and your request is pending management approval.','تم دفع رسوم الحجز وطلبك بانتظار موافقة الإدارة.')}</p><p>{studio}</p><dl><div><dt>{t('Booking reference','مرجع الحجز')}</dt><dd><bdi>DM-{success.id}</bdi></dd></div><div><dt>{t('Date','التاريخ')}</dt><dd><bdi>{success.availability?.date?formatVisibleDate(success.availability.date,language):''}</bdi></dd></div><div><dt>{t('Time','الوقت')}</dt><dd><bdi>{success.availability?.startTime}–{success.availability?.endTime}</bdi></dd></div><div><dt>{t('Booking fee','رسوم الحجز')}</dt><dd><bdi>100 ILS</bdi></dd></div><div><dt>{t('Payment','الدفع')}</dt><dd>{t('Successful','ناجح')}</dd></div></dl><div className="hero-actions"><WhatsAppLink booking/><Link className="button-secondary" to="/dashboard">{t('View my bookings','عرض حجوزاتي')}</Link></div></section>
-  return <section className="makeup-page booking"><div className="section-intro"><p className="eyebrow">{t('STUDIO BRIDAL RESERVATIONS · 2027','حجوزات العرائس في الاستوديو · 2027')}</p><h1>{t('Your moment, considered.','لحظتكِ، بكل عناية.')}</h1><p>{language==='ar'?content.bridalDescriptionAr:content.bridalDescriptionEn}</p><p>{studio}</p><p>{t('A fixed, non-refundable booking fee of 100 ILS is required. If management rejects the request, the payment is marked for refund.','تتطلب العملية رسوم حجز ثابتة وغير قابلة للاسترداد بقيمة 100 شيكل. إذا رفضت الإدارة الطلب، تُحوّل الدفعة إلى حالة تتطلب الاسترداد.')}</p></div>{!user?<div className="login-prompt"><h2>{t('Sign in to reserve an appointment','سجّلي الدخول لحجز موعد')}</h2><p>{t('You can view bridal information publicly. An account is required before payment and booking.','يمكنكِ الاطلاع على معلومات العرائس علنًا. يلزم حساب قبل الدفع والحجز.')}</p><Link className="button-link" to="/login">{t('Login to continue','تسجيل الدخول للمتابعة')}</Link></div>:<form className="booking-form" onSubmit={event=>event.preventDefault()}><BookingCalendar slots={slots} value={form.availabilityId} onChange={value=>set('availabilityId',value)}/><div className="form-grid"><label>{t('Full name','الاسم الكامل')}<input value={form.brideName} onChange={event=>set('brideName',event.target.value)} required/></label><label>{t('Email','البريد الإلكتروني')}<input type="email" value={form.email} readOnly required/></label><label>{t('Israeli phone','رقم هاتف إسرائيلي')}<input type="tel" value={form.phone} onChange={event=>set('phone',event.target.value)} placeholder="05X-XXX-XXXX" required/></label><label>{t('Event type','نوع المناسبة')}<select value={form.eventType} onChange={event=>set('eventType',event.target.value)} required><option value="">{t('Please select','يرجى الاختيار')}</option><option value="wedding">{t('Wedding','زفاف')}</option><option value="engagement">{t('Engagement','خطوبة')}</option><option value="other">{t('Other event','مناسبة أخرى')}</option></select></label><label>{t('Number of people','عدد الأشخاص')}<input type="number" min="1" max="20" value={form.peopleCount} onChange={event=>set('peopleCount',event.target.value)} required/></label></div><label>{t('Notes (optional)','ملاحظات (اختياري)')}<textarea value={form.notes} onChange={event=>set('notes',event.target.value)}/></label><input className="honeypot" aria-hidden="true" tabIndex={-1} autoComplete="off" value={form.website} onChange={event=>set('website',event.target.value)}/><label className="policy"><input type="checkbox" checked={form.policyAccepted} onChange={event=>set('policyAccepted',event.target.checked)} required/><span>{t('I agree to the','أوافق على')} <Link to="/booking-policy">{t('booking policy','سياسة الحجز')}</Link> {t('and','و')} <Link to="/terms">{t('terms','الشروط')}</Link>.</span></label>{outcome&&outcome!=='SUCCESS'&&<div className={`payment-result ${outcome.toLowerCase()}`} role="status"><strong>{outcome==='FAILED'?t('Payment failed','فشل الدفع'):t('Payment cancelled','تم إلغاء الدفع')}</strong><p>{t('No appointment was created and the time slot remains available. You can try again.','لم يتم إنشاء موعد وبقي الوقت متاحًا. يمكنكِ المحاولة مرة أخرى.')}</p></div>}<div className="payment-actions"><button type="button" disabled={busy||!form.availabilityId} onClick={()=>void submit('success')}>{busy?t('Please wait...','يرجى الانتظار...'):t('Demo payment: success','دفع تجريبي: ناجح')}</button><button type="button" className="button-secondary" disabled={busy||!form.availabilityId} onClick={()=>void submit('failed')}>{t('Demo payment: fail','دفع تجريبي: فشل')}</button><button type="button" className="button-secondary" disabled={busy||!form.availabilityId} onClick={()=>void submit('cancelled')}>{t('Demo payment: cancel','دفع تجريبي: إلغاء')}</button></div></form>}</section>
+  const { language, t } = useLanguage()
+  const { content } = useWebsiteContent()
+  const [slots, setSlots] = useState<PublicAvailability[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    setLoading(true)
+    void getAvailability()
+      .then(setSlots)
+      .catch(error => toast.error(extractError(error, language)))
+      .finally(() => setLoading(false))
+  }, [language])
+
+  const studio = language === 'ar' ? content.studioAddressAr : content.studioAddressEn
+  return <section className="makeup-page booking">
+    <div className="section-intro">
+      <p className="eyebrow">{t('STUDIO BRIDAL AVAILABILITY · 2027', 'مواعيد العرائس في الاستوديو · 2027')}</p>
+      <h1>{t('Your moment, considered.', 'لحظتكِ، بكل عناية.')}</h1>
+      <p>{language === 'ar' ? content.bridalDescriptionAr : content.bridalDescriptionEn}</p>
+      <p>{studio}</p>
+      <p>{t('This calendar is for availability viewing only. Bridal appointments cannot be reserved or paid for through the website.', 'هذا التقويم مخصص لعرض المواعيد المتاحة فقط. لا يمكن حجز مواعيد العرائس أو دفع رسومها عبر الموقع.')}</p>
+    </div>
+    <div className="availability-legend" aria-label={t('Availability status legend', 'دليل حالة المواعيد')}>
+      <span className="available">{t('Available', 'متاح')}</span>
+      <span className="unavailable">{t('Unavailable', 'غير متاح')}</span>
+    </div>
+    {loading ? <p className="loading" role="status">{t('Loading availability...', 'جارٍ تحميل المواعيد...')}</p> : <BookingCalendar slots={slots} />}
+  </section>
 }

@@ -25,13 +25,6 @@ export default {
     enabled: process.env.EMAIL_ENABLED === 'true', provider: process.env.EMAIL_PROVIDER || '', from: process.env.EMAIL_FROM || '', adminEmail: process.env.ADMIN_EMAIL || 'Kamalweshahi15@gmail.com',
     smtp: { host: process.env.SMTP_HOST || '', port: Number(process.env.SMTP_PORT || 0), user: process.env.SMTP_USER || '', password: process.env.SMTP_PASSWORD || '' }, resendApiKey: process.env.RESEND_API_KEY || ''
   },
-  captcha: {
-    enabled: process.env.CAPTCHA_ENABLED === 'true'
-  },
-  bookingFee: {
-    amount: Number(process.env.BOOKING_FEE_AMOUNT || 100),
-    currency: process.env.BOOKING_FEE_CURRENCY || 'ILS'
-  },
   vdoCipher: {
     apiSecret: process.env.VDOCIPHER_API_SECRET || ''
   }

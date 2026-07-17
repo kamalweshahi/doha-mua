@@ -1,5 +1,5 @@
 import http from './http'
-import type { AdminDashboard, AdminPurchase, AdminUser, AdminUserDetail, Appointment, AppointmentStatus, Availability, BookingPaymentStatus, Course, Lesson, ProtectedVideoPlayback, WebsiteContent } from '../models/Makeup'
+import type { AdminDashboard, AdminPurchase, AdminUser, AdminUserDetail, Appointment, AppointmentStatus, Availability, Course, Lesson, ProtectedVideoPlayback, PublicAvailability, WebsiteContent } from '../models/Makeup'
 export type LessonInput = Pick<Lesson, 'position' | 'videoStatus'> & Partial<Pick<Lesson, 'titleEn' | 'titleAr' | 'descriptionEn' | 'descriptionAr' | 'videoProvider' | 'videoId' | 'playbackReference'>>
 export async function getCourses() { return (await http.get<Course[]>('/courses')).data }
 export async function getCourse(id: string | number) { return (await http.get<Course>(`/courses/${id}`)).data }
@@ -13,15 +13,15 @@ export async function getVideo(courseId: number, lessonId: number) { return (awa
 export type DemoPaymentResult = 'success' | 'failed' | 'cancelled'
 export async function checkout(courseId: number, provider: 'paypal' | 'payplus', demoResult: DemoPaymentResult) { return (await http.post<{ purchaseId: number; status: string; courseId: number; amount: number }>('/checkout', { courseId, provider, demoResult })).data }
 export async function getMyPurchases() { return (await http.get<AdminPurchase[]>('/checkout/mine')).data }
-export async function getAvailability() { return (await http.get<Availability[]>('/bookings/availability')).data }
-export type BookingResult = { paymentId?: number; paymentStatus: BookingPaymentStatus; feeAmount: number; feeCurrency: string; appointment: Appointment | null }
-export async function book(payload: { availabilityId: number; brideName: string; email: string; phone: string; eventType: string; peopleCount: number; notes: string; preferredLanguage: 'en' | 'ar'; provider: 'paypal' | 'payplus'; demoResult: DemoPaymentResult; policyAccepted: boolean; website: string }) { return (await http.post<BookingResult>('/bookings', payload)).data }
+export async function getAvailability() { return (await http.get<PublicAvailability[]>('/bookings/availability')).data }
 export async function getMyBookings() { return (await http.get<Appointment[]>('/bookings/mine')).data }
 export async function getAdminDashboard() { return (await http.get<AdminDashboard>('/admin/dashboard')).data }
 export async function getAdminBookings() { return (await http.get<Appointment[]>('/bookings/admin/appointments')).data }
 export async function updateBookingStatus(id: number, status: AppointmentStatus, cancellationBy?: 'management' | 'customer') { return (await http.put<Appointment>(`/bookings/admin/appointments/${id}`, { status, cancellationBy })).data }
-export async function createAvailability(payload: Omit<Availability, 'id'>) { return (await http.post<Availability>('/bookings/admin/availability', payload)).data }
-export async function updateAvailability(id: number, payload: Omit<Availability, 'id'>) { return (await http.put<Availability>(`/bookings/admin/availability/${id}`, payload)).data }
+export type AvailabilityInput = Pick<Availability, 'date' | 'startTime' | 'endTime' | 'isAvailable'>
+export async function getAdminAvailability() { return (await http.get<Availability[]>('/bookings/admin/availability')).data }
+export async function createAvailability(payload: AvailabilityInput) { return (await http.post<Availability>('/bookings/admin/availability', payload)).data }
+export async function updateAvailability(id: number, payload: AvailabilityInput) { return (await http.put<Availability>(`/bookings/admin/availability/${id}`, payload)).data }
 export async function getAdminUsers() { return (await http.get<AdminUser[]>('/admin/users')).data }
 export async function getAdminUser(id: string | number) { return (await http.get<AdminUserDetail>(`/admin/users/${id}`)).data }
 export async function setStudentBlocked(id: number, isBlocked: boolean) { return (await http.put<AdminUser>(`/admin/users/${id}/blocked`, { isBlocked })).data }

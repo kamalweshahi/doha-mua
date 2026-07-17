@@ -1,12 +1,7 @@
 import { BookingPaymentStatus } from '../../models/BookingPayment'
-import { bookingPaymentStatusForResult, paymentStatusAfterCancellation } from './controller'
+import { paymentStatusAfterCancellation } from './controller'
 
-describe('booking fee state rules', () => {
-  it('keeps failed and cancelled payments out of the success path', () => {
-    expect(bookingPaymentStatusForResult('failed')).toBe(BookingPaymentStatus.Failed)
-    expect(bookingPaymentStatusForResult('cancelled')).toBe(BookingPaymentStatus.Cancelled)
-    expect(bookingPaymentStatusForResult('success')).toBe(BookingPaymentStatus.Success)
-  })
+describe('legacy bridal payment state rules', () => {
   it('requires a refund after management rejection', () => {
     expect(paymentStatusAfterCancellation(BookingPaymentStatus.Success, 'management')).toBe(BookingPaymentStatus.RefundRequired)
   })
