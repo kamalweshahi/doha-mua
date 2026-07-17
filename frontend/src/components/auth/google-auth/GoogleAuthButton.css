@@ -1,0 +1,4 @@
+.google-auth-section { margin-top: 18px; }
+.auth-divider { display: flex; align-items: center; gap: 12px; color: #8296a2; font-size: .86rem; }
+.auth-divider::before, .auth-divider::after { content: ""; height: 1px; background: #d9e4e9; flex: 1; }
+.google-button { margin: 14px auto 0; min-height: 44px; display: flex; justify-content: center; overflow: hidden; }

@@ -1,0 +1,9 @@
+import { createContext, useContext, useEffect, useMemo, useState, type PropsWithChildren } from 'react'
+import type { WebsiteContent } from '../models/Makeup'
+import { getWebsiteContent } from '../services/makeup-service'
+
+export const websiteContentFallback: WebsiteContent = { id: 1, heroTitleEn: 'Beauty, refined with intention', heroTitleAr: 'جمال مصقول بعناية', heroSubtitleEn: 'Bridal artistry and professional makeup education by DOHA MUA.', heroSubtitleAr: 'فن مكياج العرائس وتعليم المكياج الاحترافي من DOHA MUA.', aboutEn: 'DOHA MUA creates refined, modern makeup with a calm and personal approach.', aboutAr: 'تقدّم DOHA MUA مكياجاً عصرياً راقياً بأسلوب هادئ وشخصي.', bridalDescriptionEn: 'Studio bridal makeup designed around your features, style and celebration.', bridalDescriptionAr: 'مكياج عروس داخل الاستوديو مصمم بما يناسب ملامحك وأسلوبك واحتفالك.', studioAddressEn: 'DOHA MUA studio — the full address is sent after booking confirmation.', studioAddressAr: 'استوديو DOHA MUA — يُرسل العنوان الكامل بعد تأكيد الحجز.', whatsappNumber: '972556800545', contactEmail: 'Kamalweshahi15@gmail.com' }
+type ContentContextValue = { content: WebsiteContent; refresh: () => Promise<void> }
+const ContentContext = createContext<ContentContextValue | null>(null)
+export function WebsiteContentProvider({ children }: PropsWithChildren) { const [content,setContent]=useState(websiteContentFallback); async function refresh(){try{setContent(await getWebsiteContent())}catch{return}} useEffect(()=>{void refresh()},[]);const value=useMemo(()=>({content,refresh}),[content]);return <ContentContext.Provider value={value}>{children}</ContentContext.Provider> }
+export default function useWebsiteContent(){const value=useContext(ContentContext);if(!value)throw new Error('WebsiteContentProvider is missing');return value}

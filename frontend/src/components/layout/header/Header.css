@@ -1,0 +1,32 @@
+.Header {
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 24px;
+  padding: 17px 5vw; background: rgba(255, 250, 248, .9); backdrop-filter: blur(14px);
+  border-bottom: 1px solid #eaded9; position: sticky; top: 0; z-index: 20;
+}
+.brand { display: inline-flex; align-items: center; gap: 8px; font-size: 1.5rem; font-weight: 950; color: #8d334d; letter-spacing: -.045em; }
+.Header nav { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+.Header nav a { color: #705b63; font-weight: 780; border-bottom: 2px solid transparent; padding: 6px 0; }
+.Header nav a.active { color: #8d334d; border-bottom-color: #d49aa5; }
+.user-area { display: flex; align-items: center; justify-content: flex-end; gap: 12px; color: #705b63; font-weight: 760; }
+.user-area > span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.user-area button { background: #422531; padding: 9px 12px; }
+.header-spacer { min-width: 120px; }
+.role-badge { display: inline-flex; align-items: center; margin-left: .45rem; padding: .15rem .5rem; border-radius: 999px; background: rgba(12,119,184,.12); color: #075985; font-size: .7rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+
+/* DOHA MUA editorial navigation */
+.Header { grid-template-columns: 110px 1fr auto auto; min-height: 84px; padding: 10px 4vw; background: rgba(255,255,255,.9); border-color: #e7e1da; }
+.brand img { width: 104px; height: 64px; object-fit: contain; }
+.Header nav a { color: #282522; font-size: .76rem; font-weight: 600; letter-spacing: .11em; text-transform: uppercase; }
+.Header nav a.active { color: #000; border-bottom-color: #000; }
+.language, .menu-toggle { padding: 8px 11px; border: 1px solid #cfc8c0; background: transparent; color: #111; border-radius: 0; }
+.menu-toggle { display: none; }
+@media (max-width: 1120px) {
+  .Header { grid-template-columns: auto 1fr; }
+  .user-area, .header-spacer { grid-column: 1 / -1; justify-content: center; }
+}
+@media (max-width: 760px) {
+  .Header { grid-template-columns: 1fr auto auto; text-align: start; gap: 10px; }
+  .Header .brand { justify-content: flex-start; }.menu-toggle { display: inline-flex; }
+  .Header nav { display: none; position: absolute; top: 84px; inset-inline: 0; padding: 25px; background: #fff; flex-direction: column; }.Header nav.open { display: flex; }
+  .header-spacer { display: none; }
+}

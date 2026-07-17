@@ -1,0 +1,47 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+backend/node_modules/
+
+# Environment files and secrets
+.env
+.env.*
+!.env.example
+frontend/.env
+frontend/.env.*
+backend/.env
+backend/.env.*
+
+# Build output
+dist/
+build/
+frontend/dist/
+backend/dist/
+
+# Logs
+*.log
+logs/
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Temporary files
+tmp/
+temp/
+
+# Database local files
+*.sqlite
+*.db
+
+# Certificates and private keys
+*.pem
+*.key
+*.crt
+
+# Uploaded runtime files
+backend/uploads/
+uploads/

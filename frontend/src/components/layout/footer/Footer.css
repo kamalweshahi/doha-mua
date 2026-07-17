@@ -1,0 +1,8 @@
+.Footer { display: grid; grid-template-columns: minmax(0, 1.4fr) auto; gap: 28px 48px; align-items: start; padding: 42px 5vw 28px; background: #0c2738; color: #d8e8ef; }
+.Footer .brand { color: #fff; }
+.footer-brand p { margin: 10px 0 0; max-width: 520px; color: #a9c2ce; }
+.whatsapp-link { display:inline-flex; align-items:center; gap:8px; margin-top:16px; padding:11px 15px; background:#fff; color:#111; border:1px solid #fff; font-weight:800; }.whatsapp-link:hover { background:#e9e4dd; }.footer-language { padding:0; background:transparent; color:#fff; border:0; box-shadow:none; }
+.footer-links { display: flex; flex-wrap: wrap; gap: 22px; font-weight: 800; }
+.footer-links a:hover { color: #74d7e8; }
+.footer-copy { grid-column: 1 / -1; margin: 6px 0 0; padding-top: 22px; border-top: 1px solid rgba(255,255,255,.12); color: #8eacba; font-size: .92rem; }
+@media (max-width: 760px) { .Footer { grid-template-columns: 1fr; } .footer-copy { grid-column: 1; } }

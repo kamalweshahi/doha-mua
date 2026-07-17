@@ -1,0 +1,11 @@
+import { BookOpen, LockKeyhole } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import toast from 'react-hot-toast'
+import type { Course } from '../../models/Makeup'
+import { getCourses } from '../../services/makeup-service'
+import extractError from '../../services/extract-error'
+import { localizeCourse } from '../../services/bilingual-content'
+import './Makeup.css'
+import useLanguage from '../../hooks/use-language'
+export default function Courses() { const {language,tr}=useLanguage(); const [courses, setCourses] = useState<Course[]>([]); const [loading, setLoading] = useState(true); useEffect(() => { void getCourses().then(setCourses).catch(error => toast.error(extractError(error,language))).finally(() => setLoading(false)) }, [language]); return <section className="makeup-page"><div className="section-intro"><p className="eyebrow">{tr('educationCollection')}</p><h1>{tr('educationTitle')}</h1><p>{tr('educationIntro')}</p></div>{loading ? <p className="loading">{tr('loading')}</p> : <div className="course-grid">{courses.map(course => { const content=localizeCourse(course,language); return <article className="course-card" key={course.id}>{course.imageUrl&&<img src={course.imageUrl} alt=""/>}<div><span className="course-price">{course.salePrice!=null&&<del><bdi>₪{course.price.toFixed(0)}</bdi></del>} <bdi>₪{course.payablePrice.toFixed(0)}</bdi></span><h2>{content.title}</h2><p>{content.shortDescription}</p><div className="course-meta"><span><BookOpen size={16}/><bdi>{course.lessons.length}</bdi> {tr('lessons')}</span>{course.isPurchased && <span><LockKeyhole size={16}/>{tr('inLibrary')}</span>}</div><Link className="text-link" to={`/courses/${course.id}`}>{tr('viewCourse')}</Link></div></article> })}</div>}{!loading && !courses.length && <p className="empty-state">{tr('collectionSoon')}</p>}</section> }

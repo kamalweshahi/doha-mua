@@ -1,0 +1,6 @@
+.Layout { min-height: 100vh; display: flex; flex-direction: column; }
+.Layout > main { flex: 1; width: 100%; padding: 36px 5vw 58px; }
+
+@media (max-width: 760px) {
+  .Layout > main { padding: 27px 16px 44px; }
+}

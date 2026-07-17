@@ -1,0 +1,70 @@
+services:
+  database:
+    build: ./database
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "1"
+      MYSQL_DATABASE: makeup_atelier
+      MYSQL_TCP_PORT: "3306"
+    expose:
+      - "3306"
+    volumes:
+      - makeup-mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  backend:
+    build: ./backend
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: compose
+      MAKEUP_GOOGLE_CLIENT_ID: ${MAKEUP_GOOGLE_CLIENT_ID:-}
+      MAKEUP_JWT_KEY: ${MAKEUP_JWT_KEY:-change-this-jwt-secret}
+      MAKEUP_PASSWORD_KEY: ${MAKEUP_PASSWORD_KEY:-change-this-password-secret}
+      MAKEUP_CORS_ORIGIN: http://16.164.32.9:6123
+      MAKEUP_PUBLIC_BACKEND_URL: http://16.164.32.9:3000
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-Kamalweshahi15@gmail.com}
+      EMAIL_ENABLED: ${EMAIL_ENABLED:-false}
+      EMAIL_PROVIDER: ${EMAIL_PROVIDER:-}
+      EMAIL_FROM: ${EMAIL_FROM:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      CAPTCHA_ENABLED: ${CAPTCHA_ENABLED:-false}
+      BOOKING_FEE_AMOUNT: ${BOOKING_FEE_AMOUNT:-100}
+      BOOKING_FEE_CURRENCY: ${BOOKING_FEE_CURRENCY:-ILS}
+      VDOCIPHER_API_SECRET: ${VDOCIPHER_API_SECRET:-}
+    volumes:
+      - makeup-upload-data:/app/uploads
+    depends_on:
+      database:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_GOOGLE_CLIENT_ID: ${MAKEUP_GOOGLE_CLIENT_ID:-}
+        VITE_WHATSAPP_NUMBER: ${VITE_WHATSAPP_NUMBER:-972556800545}
+        VITE_API_URL: http://16.164.32.9:3000/api
+    ports:
+      - "6123:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  makeup-mysql-data:
+  makeup-upload-data:
